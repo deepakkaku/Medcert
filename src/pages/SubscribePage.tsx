@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import confettiAnimation from '../assets/confetti.json';
 import ConfirmationModal from '../components/ui/ConfirmationModal';
-import OnboardingModal from '../components/OnboardingModal';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../hooks/useSubscription';
 
@@ -97,7 +96,6 @@ const SubscribePage: React.FC = () => {
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const selectedPlanDetails = useMemo(
     () => PLANS.find(plan => plan.id === selectedPlan) ?? PLANS[2],
@@ -179,7 +177,6 @@ const SubscribePage: React.FC = () => {
             await sync();
           }
           setShowConfetti(true);
-          setShowOnboarding(true);
           setIsProcessing(false);
         },
         onDismiss: () => {
@@ -211,10 +208,6 @@ const SubscribePage: React.FC = () => {
       {showConfetti && (
         <ConfettiOverlay onComplete={() => setShowConfetti(false)} />
       )}
-      <OnboardingModal 
-        isOpen={showOnboarding} 
-        onClose={() => setShowOnboarding(false)} 
-      />
       <div className="mx-auto max-w-6xl pb-6">
         <header className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -385,10 +378,6 @@ const SubscribePage: React.FC = () => {
     {showConfetti && (
       <ConfettiOverlay onComplete={() => setShowConfetti(false)} />
     )}
-    <OnboardingModal 
-      isOpen={showOnboarding} 
-      onClose={() => setShowOnboarding(false)} 
-    />
     <div className="mx-auto max-w-6xl pb-24 sm:pb-6">
       <section className="relative overflow-hidden rounded-[36px] bg-white px-5 py-7 shadow-[0_24px_80px_rgba(0,110,126,0.10)] ring-1 ring-[#d6eaee] sm:px-8 sm:py-9 lg:px-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,138,158,0.12),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(0,110,126,0.10),transparent_34%)]" />

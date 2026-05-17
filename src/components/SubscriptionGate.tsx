@@ -5,7 +5,6 @@ import { ArrowRight, Crown, Star, Zap, Shield, FileText, Users, CheckCircle, Che
 import { useAuth } from '../context/AuthContext'
 import { useSubscription } from '../hooks/useSubscription'
 import Avatar from './ui/Avatar'
-import OnboardingModal from './OnboardingModal'
 
 interface SubscriptionGateProps {
   children: React.ReactNode;
@@ -59,7 +58,6 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children, fullPage 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const selectedPlanDetails = PLANS.find(plan => plan.id === selectedPlan) ?? PLANS[2];
 
   React.useEffect(() => {
@@ -104,7 +102,6 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children, fullPage 
           // 2. Trigger sync in hook
           await sync(response.razorpay_subscription_id);
 
-          setShowOnboarding(true);
           setIsProcessing(false);
         },
         onDismiss: () => {
@@ -142,7 +139,6 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children, fullPage 
   if (isActive) {
     return (
       <>
-        <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />
         {children}
       </>
     )
@@ -416,7 +412,6 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children, fullPage 
     return (
       <div className="fixed inset-0 z-[100] bg-[#f8fcfd] overflow-y-auto flex flex-col font-sans selection:bg-[#dff4f7] selection:text-[#006e7e] pt-20">
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,138,158,0.10),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(0,110,126,0.08),transparent_35%)] pointer-events-none" />
-        <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />
         {Header}
         <div className="flex-1 relative z-10">
           {PlansSection}
@@ -427,7 +422,6 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children, fullPage 
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <OnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

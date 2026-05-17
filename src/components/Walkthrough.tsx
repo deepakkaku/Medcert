@@ -65,6 +65,16 @@ const Walkthrough: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+
+  const steps = React.useMemo(() => {
+    return STEPS.filter(step => {
+      // Only show mobile menu step on mobile
+      if (step.targetId === "mobile-menu-button") {
+        return isMobile;
+      }
+      return true;
+    });
+  }, [isMobile]);
   
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -82,7 +92,7 @@ const Walkthrough: React.FC = () => {
   useEffect(() => {
     if (!isVisible) return;
     
-    const step = STEPS[currentStep];
+    const step = steps[currentStep];
     let intervalId: number;
     let retryCount = 0;
 
@@ -142,7 +152,7 @@ const Walkthrough: React.FC = () => {
   }, [currentStep, isVisible, isMobile, isMobileMenuOpen]); // Re-added isMobileMenuOpen to respond to manual sidebar state changes
 
   const handleNext = () => {
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
       handleComplete();
@@ -164,7 +174,7 @@ const Walkthrough: React.FC = () => {
 
   if (!isVisible) return null;
 
-  const step = STEPS[currentStep];
+  const step = steps[currentStep];
 
   return (
     <div className="fixed inset-0 z-[11000] pointer-events-none select-none">
@@ -272,7 +282,7 @@ const Walkthrough: React.FC = () => {
             {/* Dots (Hidden on small overlapping popup) */}
             {(!isMobile || !targetRect) && (
               <div className="flex gap-1.5">
-                {STEPS.map((_, i) => (
+                {steps.map((_, i) => (
                   <div 
                     key={i} 
                     className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -296,7 +306,7 @@ const Walkthrough: React.FC = () => {
                 onClick={handleNext}
                 className={`flex items-center gap-2 rounded-2xl bg-slate-950 ${isMobile && targetRect ? 'px-4 py-2 text-xs' : 'px-6 py-3 text-sm'} font-black text-white shadow-lg transition hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0`}
               >
-                {currentStep === STEPS.length - 1 ? 'Finish' : 'Next'}
+                {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
                 <ArrowRight size={isMobile && targetRect ? 14 : 18} />
               </button>
             </div>
