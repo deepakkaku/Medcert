@@ -1,0 +1,100 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# next.js
+.next/
+out/
+
+# nuxt.js
+.nuxt/
+dist/
+
+# Gatsby files
+.cache/
+# Comment in the public line if your project uses Gatsby and you want to debug the
+# build locally
+# public
+
+# vue-cli dist directory
+dist/
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernSession file
+.tern-port
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.cproject
+.settings/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Project specific
+node-compile-cache/
+supabase/.temp/
+ssh-key-*.key
+
+# Root level junk
+/*.png
+/*.PNG
+/*.jpg
+/*.jpeg
+/*.pdf
+/Screenshot*.png
+/IMG_*.PNG
+
+# Ensure public assets are kept (if not already handled by above)
+!/public/
+!/src/assets/

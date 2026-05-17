@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+  }
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  .no-print-bg {
+    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
+
+@media print {
+  @page { margin: 15mm; size: A4 portrait; }
+  .no-print { display: none !important; }
+  .no-print-wrapper {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  html, body {
+    background-color: white !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
+  * {
+    -webkit-print-color-adjust: economy !important;
+    color-adjust: economy !important;
+    print-color-adjust: economy !important;
+  }
+  .print-document, .print-document * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .min-h-screen, main, [class*="bg-"], [class*="h-"] {
+    background: none !important;
+    background-color: transparent !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  .max-w-7xl { max-width: 100% !important; margin: 0 !important; }
+  .lg\:grid-cols-2 { display: block !important; }
+  .no-print-bg {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    display: block !important;
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+  .print-width-reset {
+    width: 100% !important;
+    transform: none !important;
+    height: auto !important;
+    margin-bottom: 0 !important;
+  }
+  .print-document {
+    background: white !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    border: none !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  header, footer, aside, .fixed, .absolute.inset-0.overflow-hidden {
+    display: none !important;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
