@@ -332,6 +332,7 @@ Additional Notes: ${data.additionalNotes || "N/A"}`;
                   <Search size={16} className="text-slate-400" />
                 </div>
                 <input
+                  id="patient-search-field"
                   type="text"
                   placeholder="Search existing patient..."
                   className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-[#d6eaee] dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-[#006e7e] transition-all"

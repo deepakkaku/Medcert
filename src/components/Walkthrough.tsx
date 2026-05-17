@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowRight, X, ChevronLeft, Settings, Users, History, CheckCircle, Lightbulb, Menu } from 'lucide-react';
+import { Sparkles, ArrowRight, X, ChevronLeft, Settings, Users, History, CheckCircle, Lightbulb, Menu, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../hooks/useSubscription';
 
@@ -57,16 +57,28 @@ const STEPS: WalkthroughStep[] = [
   }
 ];
 
+const SEARCH_TIP_STEP: WalkthroughStep = {
+  title: "Quick Patient Search",
+  description: "Search for an existing patient here to auto-fill their details instantly. This saves lot of manual entry time! You can manage your patients in the Patients page.",
+  targetId: "patient-search-field",
+  icon: <Search className="text-white" size={24} />,
+  accent: "from-[#006e7e] to-[#008a9e]"
+};
+
 const Walkthrough: React.FC = () => {
   const { profile, completeWalkthrough, isMobileMenuOpen, setIsMobileMenuOpen } = useAuth();
   const { isActive: isSubscriptionActive } = useSubscription();
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [isSearchTipMode, setIsSearchTipMode] = useState(false);
 
   const steps = React.useMemo(() => {
+    if (isSearchTipMode) return [SEARCH_TIP_STEP];
+    
     return STEPS.filter(step => {
       // Only show mobile menu step on mobile
       if (step.targetId === "mobile-menu-button") {
@@ -74,7 +86,7 @@ const Walkthrough: React.FC = () => {
       }
       return true;
     });
-  }, [isMobile]);
+  }, [isMobile, isSearchTipMode]);
   
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -82,12 +94,36 @@ const Walkthrough: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Main Walkthrough Trigger
   useEffect(() => {
     if (profile && profile.has_completed_walkthrough === false && isSubscriptionActive) {
-      const timer = setTimeout(() => setIsVisible(true), 1200);
+      const timer = setTimeout(() => {
+        setIsSearchTipMode(false);
+        setIsVisible(true);
+      }, 1200);
       return () => clearTimeout(timer);
     }
   }, [profile, isSubscriptionActive]);
+
+  // Contextual Search Tip Trigger
+  useEffect(() => {
+    if (profile?.has_completed_walkthrough && isSubscriptionActive && !isVisible) {
+      const hasSeenTip = localStorage.getItem('has_seen_search_tip');
+      const isCorrectPage = location.pathname === '/' || location.pathname === '/discharge-summary';
+      
+      if (!hasSeenTip && isCorrectPage) {
+        const timer = setTimeout(() => {
+          // Check if target exists
+          if (document.getElementById('patient-search-field')) {
+            setIsSearchTipMode(true);
+            setCurrentStep(0);
+            setIsVisible(true);
+          }
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [profile, isSubscriptionActive, location.pathname, isVisible]);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -125,7 +161,7 @@ const Walkthrough: React.FC = () => {
     if (step.targetId) {
       // Only auto-open the mobile menu if we are PAST the "Quick Access Menu" step
       // This allows the user to see the tooltip pointing to the button BEFORE the menu covers it.
-      if (isMobile && !isMobileMenuOpen && step.targetId !== "mobile-menu-button") {
+      if (isMobile && !isMobileMenuOpen && step.targetId !== "mobile-menu-button" && !isSearchTipMode) {
         setIsMobileMenuOpen(true);
       }
       
@@ -149,7 +185,7 @@ const Walkthrough: React.FC = () => {
     return () => {
       if (intervalId) window.clearInterval(intervalId);
     };
-  }, [currentStep, isVisible, isMobile, isMobileMenuOpen]); // Re-added isMobileMenuOpen to respond to manual sidebar state changes
+  }, [currentStep, isVisible, isMobile, isMobileMenuOpen, isSearchTipMode]); // Re-added isMobileMenuOpen to respond to manual sidebar state changes
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -168,8 +204,13 @@ const Walkthrough: React.FC = () => {
   const handleComplete = () => {
     setIsVisible(false);
     setIsMobileMenuOpen(false);
-    completeWalkthrough();
-    navigate('/settings');
+    if (isSearchTipMode) {
+      localStorage.setItem('has_seen_search_tip', 'true');
+      setIsSearchTipMode(false);
+    } else {
+      completeWalkthrough();
+      navigate('/settings');
+    }
   };
 
   if (!isVisible) return null;
@@ -246,6 +287,13 @@ const Walkthrough: React.FC = () => {
             top: '50%',
             x: '-50%',
             y: '-50%'
+          } : targetRect && isSearchTipMode ? {
+            opacity: 1, 
+            scale: 1,
+            top: targetRect.bottom + 20,
+            left: Math.max(12, targetRect.right - 360),
+            x: 0,
+            y: 0
           } : { 
             opacity: 1, 
             scale: 1,
@@ -314,11 +362,13 @@ const Walkthrough: React.FC = () => {
 
           {/* Desktop/Mobile Arrow */}
           {targetRect && (
-            isMobile ? (
+            (isMobile || isSearchTipMode) ? (
               <div 
                 className="absolute top-0 left-6 -translate-y-full"
                 style={{ 
-                  left: Math.max(12, Math.min(280, targetRect.left - Math.max(12, Math.min(window.innerWidth - 312, targetRect.left - 6)) + 12))
+                  left: isMobile 
+                    ? Math.max(12, Math.min(280, targetRect.left - Math.max(12, Math.min(window.innerWidth - 312, targetRect.left - 6)) + 12))
+                    : Math.max(12, Math.min(340, targetRect.left + (targetRect.width / 2) - Math.max(12, targetRect.right - 360) - 10))
                 }}
               >
                 <div className="h-0 w-0 border-x-[10px] border-b-[10px] border-x-transparent border-b-white" />
