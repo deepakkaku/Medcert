@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { getAuthenticatedUserId } from '../_shared/auth.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,24 +19,36 @@ serve(async (req) => {
   }
 
   try {
-    const { plan_id, user_id } = await req.json()
-    console.log(`[SUBSCRIPTION_CREATE] Received request for user ${user_id}`)
+    const { plan_id, user_id: requestedUserId } = await req.json()
     console.log(`[SUBSCRIPTION_CREATE] Target Razorpay Plan ID: ${plan_id}`)
 
     if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
       throw new Error('Razorpay keys not configured')
     }
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('Supabase service credentials not configured')
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    const user_id = await getAuthenticatedUserId(req, supabase)
+    if (requestedUserId && requestedUserId !== user_id) {
+      throw new Error('Cannot create subscription for another user')
+    }
+
+    console.log(`[SUBSCRIPTION_CREATE] Received request for user ${user_id}`)
 
     // 1. Safety Check: Check if user already has an active subscription in DB
     // This prevents accidental double subscriptions
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     const { data: existingSub } = await supabase
       .from('subscriptions')
       .select('status, razorpay_subscription_id')
       .eq('user_id', user_id)
       .maybeSingle()
 
-    if (existingSub?.status === 'active' || existingSub?.status === 'authenticated') {
+    if (
+      existingSub?.razorpay_subscription_id &&
+      (existingSub.status === 'active' || existingSub.status === 'authenticated')
+    ) {
       console.log(`User ${user_id} already has an active subscription: ${existingSub.razorpay_subscription_id}`)
       // We return the existing one instead of creating a new one
       return new Response(JSON.stringify({ 

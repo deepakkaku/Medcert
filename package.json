@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --port 5174",
     "build": "tsc && vite build",
-    "preview": "vite preview --port 5174"
+    "preview": "vite preview --port 5174",
+    "test:subscription": "tsx tests/razorpaySubscription.test.ts"
   },
   "dependencies": {
     "@paper-design/shaders": "^0.0.76",
